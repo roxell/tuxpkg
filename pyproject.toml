@@ -9,3 +9,5 @@ author-email = "antonio.terceiro@linaro.org"
 home-page = "https://gitlab.com/Linaro/tuxpkg"
 classifiers = ["License :: OSI Approved :: MIT License"]
 
+[tool.flit.scripts]
+tuxpkg = "tuxpkg.__main__:main"
