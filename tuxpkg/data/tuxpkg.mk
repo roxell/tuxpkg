@@ -29,7 +29,7 @@ debsrc: dist dist/$(PROJECT)_$(version)-1.dsc dist/$(PROJECT)_$(version).orig.ta
 dist/$(PROJECT)_$(version).orig.tar.gz: dist/$(PROJECT)-$(version).tar.gz
 	ln -f $< $@
 
-dist/$(PROJECT)_$(version)-1.dsc: dist/$(PROJECT)_$(version).orig.tar.gz $(wildcard debian/*)
+dist/$(PROJECT)_$(version)-1.dsc: debian dist/$(PROJECT)_$(version).orig.tar.gz $(wildcard debian/*)
 	cd dist && tar xaf $(PROJECT)_$(version).orig.tar.gz
 	cp -r debian/ dist/$(PROJECT)-$(version)
 	cd dist/$(PROJECT)-$(version)/ && dpkg-buildpackage -S -d -us -uc
