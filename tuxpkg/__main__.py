@@ -2,8 +2,12 @@ import sys
 
 
 def main():
-	pass
+	return 0
 
 
-if __name__ == "__main__":
-	sys.exit(main())
+def run():
+	if __name__ == "__main__":
+		sys.exit(main())
+
+
+run()
