@@ -16,3 +16,22 @@ repository:
   needs:
     - deb
     - rpm
+
+pypi:
+  extends: [.pypi]
+  only:
+    - tags
+  needs: [dist]
+
+pages:
+  needs:
+    - repository
+  only:
+    - tags
+  script:
+    - mkdir public
+    - echo SOON > public/index.html
+    - cp -r dist/repo public/packages
+  artifacts:
+    paths:
+      - public

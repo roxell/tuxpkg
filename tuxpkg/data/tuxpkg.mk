@@ -45,6 +45,8 @@ run:
 	echo 'exec python3 -m $(PROJECT) "$$@"' >> $@
 	chmod +x run
 
+release:
+	python3 -m tuxpkg release
 
 clean::
 	$(RM) -r $(CLEAN)

@@ -48,3 +48,10 @@ variables:
     paths:
       - dist/repo
 
+.pypi:
+  image: debian
+  stage: publish
+  script:
+    - apt-get update
+    - apt-get istall --no-install-recommends git flit
+    - flit publish

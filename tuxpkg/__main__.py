@@ -4,6 +4,7 @@ import tuxpkg
 import tuxpkg.get_makefile
 import tuxpkg.get_debian_rules
 import tuxpkg.create_repository
+import tuxpkg.release
 
 
 def main():
@@ -43,6 +44,12 @@ def main():
         help="Creates Debian and RPM repository from files in dist/."
     )
     create_repository.set_defaults(func=tuxpkg.create_repository.run)
+
+    release = subparsers.add_parser(
+        "release",
+        help="Makes a release"
+    )
+    release.set_defaults(func=tuxpkg.release.run)
 
     options = parser.parse_args(sys.argv[1:])
     options.func()
