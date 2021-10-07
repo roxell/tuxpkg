@@ -1,0 +1,18 @@
+dist:
+  extends: [.dist]
+
+deb:
+  extends: [.deb]
+  needs: [dist]
+
+rpm:
+  extends: [.rpm]
+  needs: [dist]
+
+repository:
+  extends: [.repository]
+  only:
+    - tags
+  needs:
+    - deb
+    - rpm
