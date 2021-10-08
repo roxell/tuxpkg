@@ -54,6 +54,6 @@ pypi:
   script:
     - apt-get update
     - apt-get install -qy --no-install-recommends git flit
-    - echo "I: FLIT_USERNAME: ${FLIT_USERNAME}"
+    - "echo I: FLIT_USERNAME: ${FLIT_USERNAME}"
     - 'if [ -n "${FLIT_PASSWORD}" ]; then echo "I: FLIT_PASSWORD is set!"; else echo "E: FLIT_PASSWORD is NOT SET!"; fi'
     - flit publish
