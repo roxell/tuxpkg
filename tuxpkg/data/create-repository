@@ -14,7 +14,7 @@ if [ -n "${TUXPKG_RELEASE_KEY:-}" ]; then
 fi
 
 if [ -z "${TUXPKG_RELEASE_KEYID:-}" ]; then
-    if [ -n "${GNUPGID}" ]; then
+    if [ -n "${GNUPGID:-}" ]; then
         TUXPKG_RELEASE_KEYID="${GNUPGID}"
     else
         TUXPKG_RELEASE_KEYID=
