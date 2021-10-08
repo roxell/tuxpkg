@@ -4,6 +4,8 @@ variables:
 rpm:
   stage: build
   image: fedora
+  variables:
+    FLIT_NO_NETWORK: 1
   script:
     - dnf install -y dnf-plugins-core rpm-build
     - 'dnf builddep -y *.spec'
@@ -15,6 +17,8 @@ rpm:
 deb:
   stage: build
   image: debian
+  variables:
+    FLIT_NO_NETWORK: 1
   script:
     - apt-get update
     - apt-get install -qy auto-apt-proxy
