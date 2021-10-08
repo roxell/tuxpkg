@@ -1,5 +1,12 @@
 variables:
   TUXPKG: tuxpkg
+  PYTEST_ARGS: ""
+
+test:
+  stage: test
+  image: debian
+  script:
+    - make test
 
 image: $CI_REGISTRY_IMAGE:ci-debian
 
@@ -80,11 +87,12 @@ pypi:
   only:
     - tags
   stage: deploy
+  needs:
+    - test
+    - repository
   variables:
     FLIT_USERNAME: __token__
   script:
-    - apt-get update
-    - apt-get install -qy --no-install-recommends git flit
     - "echo I: FLIT_USERNAME: ${FLIT_USERNAME}"
     - 'if [ -n "${FLIT_PASSWORD}" ]; then echo "I: FLIT_PASSWORD is set!"; else echo "E: FLIT_PASSWORD is NOT SET!"; fi'
     - flit publish
