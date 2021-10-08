@@ -1,7 +1,7 @@
 variables:
   TUXPKG: tuxpkg
 
-image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-debian
+image: $CI_REGISTRY/$CI_PROJECT_PATH_SLUG/ci-debian
 
 ci-image-debian:
   stage: .pre
@@ -13,7 +13,7 @@ ci-image-debian:
   script:
   - 'docker build --build-arg=EXTRA_PACKAGES="dpkg-dev apt-utils createrepo-c rpm gpg gpg-agent python3" -t $CI_REGISTRY/$CI_PROJECT_PATH_SLUG/ci-debian -f Dockerfile.ci-debian .'
   - 'docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY'
-  - 'docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-debian'
+  - 'docker push $CI_REGISTRY/$CI_PROJECT_PATH_SLUGci-debian'
   only:
     refs:
     - master
@@ -32,7 +32,7 @@ ci-image-fedora:
   script:
   - 'docker build -t $CI_REGISTRY/$CI_PROJECT_PATH_SLUG/ci-fedora -f Dockerfile.ci-fedora .'
   - 'docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY'
-  - 'docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-fedora'
+  - 'docker push $CI_REGISTRY/$CI_PROJECT_PATH_SLUGci-fedora'
   only:
     refs:
     - master
@@ -43,7 +43,7 @@ ci-image-fedora:
 
 rpm:
   stage: build
-  image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-fedora
+  image: $CI_REGISTRY/$CI_PROJECT_PATH_SLUG/ci-fedora
   variables:
     FLIT_NO_NETWORK: 1
   script:
