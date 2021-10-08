@@ -1,16 +1,16 @@
 dist:
-  extends: [.dist]
+  extends: .dist
 
 deb:
-  extends: [.deb]
+  extends: .deb
   needs: [dist]
 
 rpm:
-  extends: [.rpm]
+  extends: .rpm
   needs: [dist]
 
 repository:
-  extends: [.repository]
+  extends: .repository
   only:
     - tags
   needs:
@@ -18,7 +18,7 @@ repository:
     - rpm
 
 pypi:
-  extends: [.pypi]
+  extends: .pypi
   only:
     - tags
   needs: [dist]
