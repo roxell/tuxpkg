@@ -1,55 +1,60 @@
 import argparse
 import sys
-import tuxpkg
-import tuxpkg.get_makefile
-import tuxpkg.get_debian_rules
-import tuxpkg.create_repository
-import tuxpkg.release
+from tuxpkg import __version__ as VERSION
+from tuxpkg import __doc__ as DOC
+from tuxpkg import actions
+
+
+class TuxPkgCommands:
+    def __init__(self, parser):
+        self.sub_parsers = parser.add_subparsers(
+            title="Subcommands",
+            description="All tuxpkg is available through one of its subcommands.",
+        )
+
+    def add_command(self, name, help=None, aliases=[]):
+        command = self.sub_parsers.add_parser(
+            name,
+            aliases=aliases,
+            help=help,
+        )
+        command.set_defaults(func=getattr(actions, name.replace("-", "_")))
+        return command
 
 
 def main():
     parser = argparse.ArgumentParser(
         prog="tuxpkg",
-        description=tuxpkg.__doc__.strip(),
+        description=DOC.strip(),
     )
     parser.add_argument(
         "-V",
         "--version",
         action="version",
-        version=f"%(prog)s {tuxpkg.__version__}",
+        version=f"%(prog)s {VERSION}",
     )
     parser.set_defaults(func=parser.print_usage)
 
-    subparsers = parser.add_subparsers(
-        title="Subcommands",
-        description="All tuxpkg is available through one of its subcommands.",
-    )
+    commands = TuxPkgCommands(parser)
 
-    get_makefile = subparsers.add_parser(
+    commands.add_command(
         "get-makefile",
         aliases=["mk"],
         help="Prints the path to the tuxpkg shared makefile. It can be included in a Makefile using a construct like like `$(include $(shell tuxpkg get-makefile))`.",
     )
-    get_makefile.set_defaults(func=tuxpkg.get_makefile.run)
 
-    get_debian_rules = subparsers.add_parser(
+    commands.add_command(
         "get-debian-rules",
         help="Prints the path to the tuxpkg shared debian/rules. It can be included in a your debian/rules using a construct like like `$(include $(shell tuxpkg get-makefile))`. You just need to set PYBUILD_NAME first.",
     )
-    get_debian_rules.set_defaults(func=tuxpkg.get_debian_rules.run)
 
-    create_repository = subparsers.add_parser(
+    commands.add_command(
         "create-repository",
         aliases=["repo"],
-        help="Creates Debian and RPM repository from files in dist/."
+        help="Creates Debian and RPM repository from files in dist/.",
     )
-    create_repository.set_defaults(func=tuxpkg.create_repository.run)
 
-    release = subparsers.add_parser(
-        "release",
-        help="Makes a release"
-    )
-    release.set_defaults(func=tuxpkg.release.run)
+    commands.add_command("release", help="Makes a release")
 
     options = parser.parse_args(sys.argv[1:])
     options.func()
