@@ -9,7 +9,6 @@ if [ -z "${version}" ]; then
 fi
 relnotes=.git/relnotes-${version}.txt
 git=${git:-git}
-flit=${flit:-flit}
 
 if [ -n "$(git tag --list v${version})" ]; then
     echo "Version ${version} already released. Bump the version in ${PROJECT}/__init__.py to make a new release"
@@ -49,6 +48,5 @@ $git commit -a -m "Release ${version}"
 
 $git push
 $git tag --sign --file=${relnotes} v${version}
-$flit publish
 $git push --tags
 rm -f ${relnotes}
