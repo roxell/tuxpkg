@@ -6,7 +6,6 @@ How to use:
 
 ```yaml
 include:
-  - https://gitlab.com/Linaro/tuxpkg/raw/main/gitlab-ci-build-packages.yml
   - https://gitlab.com/Linaro/tuxpkg/raw/main/gitlab-ci-pipeline.yml
 variables:
   # ... override variables here (see below)

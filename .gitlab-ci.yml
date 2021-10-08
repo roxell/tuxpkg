@@ -1,6 +1,19 @@
 include:
-  - /gitlab-ci-build-packages.yml
   - /gitlab-ci-pipeline.yml
 
 variables:
   TUXPKG: python3 -m tuxpkg
+
+pages:
+  stage: deploy
+  needs:
+    - repository
+  only:
+    - tags
+  script:
+    - mkdir public
+    - echo SOON > public/index.html
+    - cp -r dist/repo public/packages
+  artifacts:
+    paths:
+      - public

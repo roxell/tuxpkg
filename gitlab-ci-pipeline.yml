@@ -1,39 +1,71 @@
-dist:
-  extends: .dist
+variables:
+  TUXPKG: tuxpkg
 
-deb:
-  extends: .deb
-  needs:
-    - dist
+dist:
+  stage: build
+  image: debian
+  script:
+    - apt-get update
+    - apt-get install -qy auto-apt-proxy
+    - apt-get install -qy --no-install-recommends make git flit
+    - make dist
+  artifacts:
+    paths:
+      - dist/*.tar.gz
+      - dist/*.whl
 
 rpm:
-  extends: .rpm
-  needs: [dist]
+  stage: build
+  needs:
+    - dist
+  image: fedora
+  script:
+    - dnf install -y dnf-plugins-core rpm-build
+    - 'dnf builddep -y *.spec'
+    - make rpm
+  artifacts:
+    paths:
+      - dist/*.rpm
+
+.deb:
+  stage: build
+  needs:
+    - dist
+  image: debian
+  script:
+    - apt-get update
+    - apt-get install -qy auto-apt-proxy
+    - apt-get build-dep -qy .
+    - make deb
+  artifacts:
+    paths:
+      - dist/*.deb
 
 repository:
-  extends: .repository
+  image: debian
   only:
     - tags
   needs:
     - deb
     - rpm
+  stage: deploy
+  script:
+    - apt-get update
+    - apt-get install --no-install-recommends -qy dpkg-dev apt-utils createrepo-c rpm gpg gpg-agent python3
+    - ${TUXPKG} create-repo
+  artifacts:
+    paths:
+      - dist/repo
 
 pypi:
-  extends: .pypi
   only:
     - tags
   needs: [dist]
-
-pages:
+  image: debian
   stage: deploy
-  needs:
-    - repository
-  only:
-    - tags
+  variables:
+    FLIT_USERNAME: __token__
   script:
-    - mkdir public
-    - echo SOON > public/index.html
-    - cp -r dist/repo public/packages
-  artifacts:
-    paths:
-      - public
+    - apt-get update
+    - apt-get istall --no-install-recommends git flit
+    - flit publish
