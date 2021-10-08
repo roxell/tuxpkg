@@ -11,7 +11,7 @@ ci-image-debian:
   variables:
     DOCKER_DRIVER: overlay2
   script:
-  - 'docker build --build-arg=EXTRA_PACKAGES="dpkg-dev apt-utils createrepo-c rpm gpg gpg-agent python3" -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-debian -f Dockerfile.ci-debian .'
+  - 'docker build --build-arg=EXTRA_PACKAGES="dpkg-dev apt-utils createrepo-c rpm gpg gpg-agent python3" -t $CI_REGISTRY/$CI_PROJECT_PATH_SLUG/ci-debian -f Dockerfile.ci-debian .'
   - 'docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY'
   - 'docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-debian'
   only:
@@ -30,7 +30,7 @@ ci-image-fedora:
   variables:
     DOCKER_DRIVER: overlay2
   script:
-  - 'docker build -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-fedora -f Dockerfile.ci-fedora .'
+  - 'docker build -t $CI_REGISTRY/$CI_PROJECT_PATH_SLUG/ci-fedora -f Dockerfile.ci-fedora .'
   - 'docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY'
   - 'docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-fedora'
   only:
