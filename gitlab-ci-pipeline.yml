@@ -21,6 +21,7 @@ ci-image-debian:
     changes:
     - Dockerfile.ci-debian
     - debian/control
+    - debian/changelog
 
 ci-image-fedora:
   stage: .pre
