@@ -39,7 +39,7 @@ repository:
   script:
     - apt-get update
     - apt-get install --no-install-recommends -qy dpkg-dev apt-utils createrepo-c rpm gpg gpg-agent python3
-    - ${TUXPKG} create-repo
+    - ${TUXPKG} create-repository
   artifacts:
     paths:
       - dist/repo
