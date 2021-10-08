@@ -1,14 +1,52 @@
 variables:
   TUXPKG: tuxpkg
 
+image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-debian
+
+ci-image-debian:
+  stage: .pre
+  image: docker:20.10-dind
+  services:
+  - name: docker:20.10-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+  script:
+  - 'docker build --build-arg=EXTRA_PACKAGES="dpkg-dev apt-utils createrepo-c rpm gpg gpg-agent python3" -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-debian -f Dockerfile.ci-debian .'
+  - 'docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY'
+  - 'docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-debian'
+  only:
+    refs:
+    - master
+    - main
+    changes:
+    - Dockerfile.ci-debian
+    - debian/control
+
+ci-image-fedora:
+  stage: .pre
+  image: docker:20.10-dind
+  services:
+  - name: docker:20.10-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+  script:
+  - 'docker build -t $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-fedora -f Dockerfile.ci-fedora .'
+  - 'docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY'
+  - 'docker push $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-fedora'
+  only:
+    refs:
+    - master
+    - main
+    changes:
+    - Dockerfile.ci-fedora
+    - '*.spec'
+
 rpm:
   stage: build
-  image: fedora
+  image: $CI_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME/ci-fedora
   variables:
     FLIT_NO_NETWORK: 1
   script:
-    - dnf install -y dnf-plugins-core rpm-build
-    - 'dnf builddep -y *.spec'
     - make rpm
   artifacts:
     paths:
@@ -16,20 +54,15 @@ rpm:
 
 deb:
   stage: build
-  image: debian
   variables:
     FLIT_NO_NETWORK: 1
   script:
-    - apt-get update
-    - apt-get install -qy auto-apt-proxy
-    - apt-get build-dep -qy .
     - make deb
   artifacts:
     paths:
       - dist/*.deb
 
 repository:
-  image: debian
   only:
     - tags
   needs:
@@ -37,8 +70,6 @@ repository:
     - rpm
   stage: deploy
   script:
-    - apt-get update
-    - apt-get install --no-install-recommends -qy dpkg-dev apt-utils createrepo-c rpm gpg gpg-agent python3
     - ${TUXPKG} create-repository
   artifacts:
     paths:
@@ -47,7 +78,6 @@ repository:
 pypi:
   only:
     - tags
-  image: debian
   stage: deploy
   variables:
     FLIT_USERNAME: __token__
