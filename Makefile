@@ -1,6 +1,6 @@
 .PHONY: test
 
-all: test style flake8 typecheck
+all: typecheck test style flake8
 
 test:
 	python3 -m pytest --cov=tuxpkg --cov-report=term-missing --cov-fail-under=100
