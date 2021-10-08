@@ -2,7 +2,7 @@
 Release automation tool for Python projects
 """
 
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 
 
 from pathlib import Path
