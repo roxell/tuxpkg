@@ -28,7 +28,7 @@ variables:
 .deb:
   stage: build
   image: debian
-  before_script:
+  script:
     - apt-get update
     - apt-get install -qy auto-apt-proxy
     - apt-get build-dep -qy .
