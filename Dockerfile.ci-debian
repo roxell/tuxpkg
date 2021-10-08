@@ -1,5 +1,5 @@
 FROM debian
-ARG EXTRA_PACKAGES=
+ARG EXTRA_PACKAGES
 
 COPY debian/control /tuxpkg/debian/control
 
