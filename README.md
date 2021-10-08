@@ -22,6 +22,6 @@ The following protected variables need to be set in the CI/CD configuration:
   export of gnupg private key to sign the package repositories.
 - `TUXPKG_RELEASE_KEYID`: the public gnupg key ID used to sign the package
   repositories.
-- `FLIT_USERNAME`: username to authenticate to PyPI with
-- `FLIT_PASSWORD`: password to authenticate to PyPI with (generate a token only
-  for this project).
+- `FLIT_PASSWORD`: password to authenticate to PyPI with. Generate a
+  project-specific token. `FLIT_USERNAME` will be automatically set to
+  `__token__`.

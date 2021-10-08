@@ -51,6 +51,8 @@ variables:
 .pypi:
   image: debian
   stage: publish
+  variables:
+    FLIT_USERNAME: __token__
   script:
     - apt-get update
     - apt-get istall --no-install-recommends git flit
