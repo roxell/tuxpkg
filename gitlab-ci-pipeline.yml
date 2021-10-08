@@ -1,9 +1,9 @@
 dist:
   extends: .dist
 
-deb:
-  extends: .deb
-  needs: [dist]
+#deb:
+  #extends: .deb
+  #needs: [dist]
 
 rpm:
   extends: .rpm
