@@ -1,0 +1,21 @@
+FROM debian
+ARG EXTRA_PACKAGES
+
+COPY debian/control /tuxpkg/debian/control
+
+RUN apt-get update \
+    && apt-get install -qy auto-apt-proxy \
+    && apt-get build-dep -qy /tuxpkg \
+    && apt-get install -q=2 \
+        black \
+        codespell \
+        flake8 \
+        flit \
+        git \
+        make \
+        mkdocs \
+        mypy \
+        ${EXTRA_PACKAGES} \
+    && true
+
+# vim: ft=dockerfile

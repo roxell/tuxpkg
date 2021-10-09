@@ -1,0 +1,8 @@
+FROM fedora
+ARG EXTRA_PACKAGES
+
+COPY *.spec /tuxpkg/
+RUN dnf install -y dnf-plugins-core rpm-build ${EXTRA_PACKAGES} \
+    && dnf builddep -y /tuxpkg/*.spec
+
+# vim: ft=dockerfile

@@ -1,0 +1,5 @@
+#!/usr/bin/make -f
+
+export PYBUILD_NAME = {{ project }}
+
+include $(shell python3 -m tuxpkg get-debian-rules)

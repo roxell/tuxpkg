@@ -1,3 +1,17 @@
+.PHONY: test
+
+test:
+	python3 -m pytest --cov=$(PROJECT) --cov-report=term-missing --cov-fail-under=100
+
+style:
+	black --check .
+
+flake8:
+	flake8 --exclude=dist/ --ignore=E501 .
+
+typecheck:
+	mypy --exclude=dist/ .
+
 version = $(shell sed -e '/^__version__/ !d; s/"\s*$$//; s/.*"//' $(PROJECT)/__init__.py)
 
 CLEAN += dist

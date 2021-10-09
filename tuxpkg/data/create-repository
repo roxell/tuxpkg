@@ -2,6 +2,7 @@
 
 set -eu
 
+project=$(dirname $(readlink -f .))
 repo=${1:-dist/repo}
 rm -rf ${repo}
 mkdir -p ${repo}
@@ -40,7 +41,7 @@ ln signing-key.asc  repodata/repomd.xml.key
 
 # deb
 dpkg-scanpackages . > Packages
-apt-ftparchive -o APT::FTPArchive::Release::Origin=tuxmake release . > Release
+apt-ftparchive -o APT::FTPArchive::Release::Origin=${project} release . > Release
 $gpg --detach-sign --output Release.gpg Release
 $gpg --clearsign --output InRelease Release
 

@@ -55,6 +55,7 @@ def main():
     )
 
     commands.add_command("release", help="Makes a release")
+    commands.add_command("init", help="Initializes a project directory")
 
     options = parser.parse_args(sys.argv[1:])
     options.func()
