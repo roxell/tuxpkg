@@ -11,6 +11,7 @@ BuildRequires: git
 BuildRequires: make
 BuildRequires: python3-devel
 BuildRequires: python3-flit
+BuildRequires: python3-jinja2
 BuildRequires: python3-pip
 BuildRequires: python3-pytest
 BuildRequires: python3-pytest-cov
