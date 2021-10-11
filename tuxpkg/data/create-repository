@@ -2,7 +2,7 @@
 
 set -eu
 
-project=$(dirname $(readlink -f .))
+project=$(basename $(readlink -f .))
 repo=${1:-dist/repo}
 rm -rf ${repo}
 mkdir -p ${repo}
