@@ -17,7 +17,7 @@ ci-image-debian:
   variables:
     DOCKER_DRIVER: overlay2
   script:
-  - 'docker build --build-arg=EXTRA_PACKAGES="dpkg-dev apt-utils createrepo-c rpm gpg gpg-agent python3" -t $CI_REGISTRY_IMAGE:ci-debian -f $($TUXPKG get-dockerfile-ci-debian) .'
+  - 'docker build --build-arg=EXTRA_PACKAGES="dpkg-dev apt-utils createrepo-c rpm gpg gpg-agent python3" -t $CI_REGISTRY_IMAGE:ci-debian -f Dockerfile.ci-debian .'
   - 'docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY'
   - 'docker push $CI_REGISTRY_IMAGE:ci-debian'
   only:
@@ -25,7 +25,7 @@ ci-image-debian:
     - master
     - main
     changes:
-    - tuxpkg/data/Dockerfile.ci-debian
+    - Dockerfile.ci-debian
     - debian/control
     - debian/changelog
 
@@ -37,7 +37,7 @@ ci-image-fedora:
   variables:
     DOCKER_DRIVER: overlay2
   script:
-  - 'docker build -t $CI_REGISTRY_IMAGE:ci-fedora -f $($TUXPKG get-dockerfile-ci-fedora) .'
+  - 'docker build -t $CI_REGISTRY_IMAGE:ci-fedora -f Dockerfile.ci-fedora .'
   - 'docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY'
   - 'docker push $CI_REGISTRY_IMAGE:ci-fedora'
   only:
@@ -45,7 +45,7 @@ ci-image-fedora:
     - master
     - main
     changes:
-    - tuxpkg/data/Dockerfile.ci-fedora
+    - Dockerfile.ci-fedora
     - '*.spec'
 
 rpm:

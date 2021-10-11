@@ -23,8 +23,6 @@ class PointToFile(FileAction):
 
 get_makefile = PointToFile("tuxpkg.mk")
 get_debian_rules = PointToFile("debianrules.mk")
-get_dockerfile_ci_debian = PointToFile("Dockerfile.ci-debian")
-get_dockerfile_ci_fedora = PointToFile("Dockerfile.ci-fedora")
 
 
 class RunScript(FileAction):

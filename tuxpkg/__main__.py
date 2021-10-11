@@ -49,15 +49,6 @@ def main():
     )
 
     commands.add_command(
-        "get-dockerfile-ci-debian",
-        help="Prints the path to a Dockerfile suitable to build a Debian-based CI image for the project",
-    )
-    commands.add_command(
-        "get-dockerfile-ci-fedora",
-        help="Prints the path to a Dockerfile suitable to build a Fedora-based CI image for the project",
-    )
-
-    commands.add_command(
         "create-repository",
         aliases=["repo"],
         help="Creates Debian and RPM repository from files in dist/.",
