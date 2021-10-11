@@ -4,7 +4,6 @@ variables:
 
 test:
   stage: test
-  image: debian
   script:
     - make test
 
