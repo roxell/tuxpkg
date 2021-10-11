@@ -6,7 +6,7 @@ test:
 	python3 -m pytest --cov=$(PROJECT) --cov-report=term-missing --cov-fail-under=$(TUXPKG_MIN_COVERAGE)
 
 style:
-	black --check .
+	black --check --diff .
 
 flake8:
 	flake8 --exclude=dist/ --ignore=E501 .
