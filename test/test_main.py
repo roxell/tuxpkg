@@ -1,3 +1,4 @@
+from pathlib import Path
 import pytest
 import sys
 import tuxpkg.__main__ as main_module
@@ -35,3 +36,15 @@ class TestMain:
     def test_get_makefile(self, argv, mocker):
         argv.append("get-makefile")
         main_module.main()
+
+    def test_get_dockerfile_ci_debian(self, argv, capsys):
+        argv.append("get-dockerfile-ci-debian")
+        main_module.main()
+        out, _ = capsys.readouterr()
+        assert Path(out.strip()).exists()
+
+    def test_get_dockerfile_ci_fedora(self, argv, capsys):
+        argv.append("get-dockerfile-ci-fedora")
+        main_module.main()
+        out, _ = capsys.readouterr()
+        assert Path(out.strip()).exists()
