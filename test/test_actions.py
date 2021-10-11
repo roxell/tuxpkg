@@ -57,7 +57,7 @@ class TestCopyDirectory:
         # template expansion in template names
         assert (tmp_path / name).with_suffix(".spec").exists()
         # file mode
-        assert (tmp_path / "debian" / "rules").stat().st_mode == 0o100755
+        assert (tmp_path / "debian" / "rules").stat().st_mode & 0o100755
 
     def test_wont_override_existing_files(self, tmp_path):
         cwd = os.getcwd()
