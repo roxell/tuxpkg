@@ -47,6 +47,6 @@ if [ -f debian/changelog ]; then
 fi
 $git commit -a -m "Release ${version}"
 
-$git push
 $git tag --sign --file=${relnotes} v${version}
+$git push
 $git push --tags
