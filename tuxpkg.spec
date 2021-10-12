@@ -20,6 +20,7 @@ BuildRequires: python3-pytest-mock
 BuildArch: noarch
 
 Requires: python3 >= 3.6
+Requires: python3-jinja2
 
 %global debug_package %{nil}
 
