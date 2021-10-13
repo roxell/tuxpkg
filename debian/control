@@ -17,7 +17,7 @@ Homepage: https://gitlab.com/Linaro/tuxpkg
 
 Package: tuxpkg
 Architecture: all
-Depends: ${misc:Depends}, python3 (>= 3.6), ${python3:Depends}
+Depends: ${misc:Depends}, python3 (>= 3.6), python3-jinja2, ${python3:Depends}
 Description: release automation tool for Python projects
  tuxpkg is a command line tool that automates common tasks for releasing Python
  projects, including but not limited to building and publishing PIP, Debian,
