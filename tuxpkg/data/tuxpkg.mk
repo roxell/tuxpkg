@@ -14,7 +14,7 @@ flake8:
 typecheck:
 	mypy --exclude=dist/ .
 
-version = $(shell sed -e '/^__version__/ !d; s/"\s*$$//; s/.*"//' $(PROJECT)/__init__.py)
+version ?= $(shell sed -e '/^__version__/ !d; s/"\s*$$//; s/.*"//' $(PROJECT)/__init__.py)
 
 CLEAN += dist
 
