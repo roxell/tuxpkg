@@ -1,5 +1,5 @@
 include:
-  - /gitlab-ci-pipeline.yml
+  - https://gitlab.com/Linaro/tuxpkg/-/raw/main/gitlab-ci-pipeline.yml
 
 variables:
   TUXPKG: python3 -m tuxpkg
