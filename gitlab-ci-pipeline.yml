@@ -5,6 +5,8 @@ variables:
 test:
   stage: test
   script:
+    - apt-get update -q
+    - apt-get build-dep -qy .
     - make test
 
 image: $CI_REGISTRY_IMAGE:ci-debian
@@ -54,6 +56,7 @@ rpm:
   variables:
     FLIT_NO_NETWORK: 1
   script:
+    - 'dnf builddep -y *.spec'
     - make rpm
     - rpm --query --info dist/*.rpm
     - rpm --query --requires dist/*.rpm
@@ -76,6 +79,8 @@ deb:
   variables:
     FLIT_NO_NETWORK: 1
   script:
+    - apt-get update -q
+    - apt-get build-dep -qy .
     - make deb
     - dpkg --info dist/*.deb
     - dpkg --contents dist/*.deb
