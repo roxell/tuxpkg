@@ -3,7 +3,7 @@
 TUXPKG_MIN_COVERAGE ?= 100
 
 test:
-	python3 -m pytest --cov=$(PROJECT) --cov-report=term-missing --cov-fail-under=$(TUXPKG_MIN_COVERAGE)
+	python3 -m pytest --cov=$(PROJECT) --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=$(TUXPKG_MIN_COVERAGE)
 
 style:
 	black --check --diff .
