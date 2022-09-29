@@ -1,4 +1,5 @@
-# tuxpkg - release automation tool for Python projects
+# tuxpkg
+## release automation tool for Python projects
 
 
 [![Pipeline Status](https://gitlab.com/Linaro/tuxpkg/badges/main/pipeline.svg)](https://gitlab.com/Linaro/tuxpkg/pipelines)
@@ -14,6 +15,7 @@ Linux kernel development.
 [[_TOC_]]
 
 
+
 # Installing tuxpkg
 
 There are several options for using tuxpkg:
@@ -24,20 +26,21 @@ There are several options for using tuxpkg:
 - [Run uninstalled](run-uninstalled.md)
 
 
+
 # gitlab CI pipeline
 How to use:
 
 !!!note
-  [gpg manual](https://gnupg.org/documentation/manpage.html)
+    [gpg manual](https://gnupg.org/documentation/manpage.html)
 
 1. repository settings
 
-!!!note
-  both the branch and repository tags must be protected!
+  !!!note
+      both the branch and repository tags must be protected!
 
-[Protected branch](https://docs.gitlab.com/ee/user/project/protected_branches.html)
+  [Protected branch](https://docs.gitlab.com/ee/user/project/protected_branches.html)
 
-[Protected tags](https://docs.gitlab.com/ee/user/project/protected_tags.html)
+  [Protected tags](https://docs.gitlab.com/ee/user/project/protected_tags.html)
 
 2. CI/CD variables
 
@@ -47,29 +50,29 @@ The following variables must be set as protected in the CI/CD configuration:
     - variable type: "file"
     - ascii-armored export of gnupg private key to sign the package repositories.  
   
-  !!!note
-    Because the private key will be uploaded into GitLab CI, you want to create a new GPG key
-  for your project only. DO NOT upload your own private key! :-)
-  
-  ```shell
-  gpg --export-private-keys --armor KEYID
-  ```
+    !!!note
+        Because the private key will be uploaded into GitLab CI, you want to create a new GPG key
+        for your project only. DO NOT upload your own private key! :-)
+    
+    ```shell
+    gpg --export-private-keys --armor KEYID
+    ```
 
 - `TUXPKG_RELEASE_KEYID`: 
     - variable type: "Variable"
     - the public gnupg key ID used to sign the package repositories. 
       The is the full GPG key id, e.g. `1EC68783C596C4AD1C2E45896D082F7024A0AEAF`.
   
-  ```shell
-  gpg -k
-  ```
+    ```shell
+    gpg -k
+    ```
 
 - `FLIT_PASSWORD`: 
     - variable type: "Variable"
     - Generate a project-specific token on [pypi.org](https://pypi.org/)
   
-  !!!note
-    [pypi api token help](https://pypi.org/help/#apitoken)
+    !!!note
+        [pypi api token help](https://pypi.org/help/#apitoken)
 
 - `FLIT_USERNAME`:
     - variable type: "Variable"

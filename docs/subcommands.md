@@ -7,7 +7,7 @@
 Creates Debian and RPM repository from files in dist/.
 
 ```shell
-tuxpkg --create-repository
+tuxpkg create-repository
 ```
 
 ## release
@@ -31,18 +31,18 @@ tuxpkg init
 Prints the path to the tuxpkg shared makefile. It can be included in a Makefile using a construct like like `$(include $(shell tuxpkg get-makefile))`
 
 ```shell
-tuxpkg --get-makefile
+tuxpkg get-makefile
 ```
 
 ## get-debian-rules
 
-Prints the path to the tuxpkg shared debian/rules. It can be included in a your debian/rules using a construct like like `$(include $(shell tuxpkg get-makefile))`. You just need to set PYBUILD_NAME first.
+Prints the path to the tuxpkg shared debian/rules. It can be included in a your debian/rules using a construct like like `$(include $(shell tuxpkg get-debian-rules))`. You just need to set PYBUILD_NAME first.
 
 ```shell
-tuxpkg --get-debian-rules
+tuxpkg get-debian-rules
 ```
 
-## show current version [V]
+## show current version [-V]
 
 ```shell
 tuxpkg --version
