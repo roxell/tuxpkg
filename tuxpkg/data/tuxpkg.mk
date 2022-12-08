@@ -62,7 +62,7 @@ run:
 	echo "set -eu" >> $@
 	echo 'realfile="$$(readlink -f "$$0")"' >> $@
 	echo 'export PYTHONPATH="$$(dirname "$$realfile")"' >> $@
-	echo 'exec python3 -m $(PROJECT) "$$@"' >> $@
+	echo 'exec python3 -m $(MODULE) "$$@"' >> $@
 	chmod +x run
 
 release:
