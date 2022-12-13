@@ -7,16 +7,16 @@ WORKERS="--workers=$(NUM_WORKERS)"
 endif
 
 test:
-	python3 -m pytest $(WORKERS) --cov=$(MODULE) --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=$(TUXPKG_MIN_COVERAGE)
+	python3 -m pytest $(WORKERS) --cov=$(MODULE) --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=$(TUXPKG_MIN_COVERAGE) $(TUXPKG_PYTEST_OPTIONS)
 
 style:
-	black --check --diff .
+	black --check --diff $(TUXPKG_BLACK_OPTIONS) .
 
 flake8:
-	flake8 --exclude=dist/ --ignore=E501,W503 .
+	flake8 --exclude=dist/ --ignore=E501,W503 $(TUXPKG_FLAKE8_OPTIONS).
 
 typecheck:
-	mypy --exclude=dist/ .
+	mypy --exclude=dist/ $(TUXPKG_MYPY_OPTIONS) .
 
 version ?= $(shell sed -e '/^__version__/ !d; s/"\s*$$//; s/.*"//' $(MODULE)/__init__.py)
 
