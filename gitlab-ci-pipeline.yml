@@ -76,7 +76,7 @@ rpm-sanity-check:
     - rpm
   script:
     - dnf install -y make
-    - make rpm-sanity-check-prepare
+    - if grep -q '^rpm-sanity-check-prepare:' Makefile; then make rpm-sanity-check-prepare; fi
     - dnf install -y ./dist/*.rpm
     - ${TUXPKG_PROJECT} --help
 
@@ -102,7 +102,7 @@ deb-sanity-check:
   script:
     - apt-get update -q
     - apt-get install -qy make
-    - make deb-sanity-check-prepare
+    - if grep -q '^deb-sanity-check-prepare:' Makefile; then make deb-sanity-check-prepare; fi
     - apt-get install -qy ./dist/*.deb
     - ${TUXPKG_PROJECT} --help
 
