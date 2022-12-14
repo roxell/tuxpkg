@@ -24,8 +24,6 @@ CLEAN += dist
 
 rpm: dist/$(PROJECT)-$(version)-0$(MODULE).noarch.rpm
 
-rpm-sanity-check-prepare::
-
 RPMBUILD = rpmbuild
 dist/$(PROJECT)-$(version)-0$(MODULE).noarch.rpm: dist/$(PROJECT)-$(version).tar.gz dist/$(PROJECT).spec
 	cd dist && \
@@ -44,8 +42,6 @@ dist/$(PROJECT)-$(version).tar.gz:
 	flit build
 
 deb: debsrc dist/$(PROJECT)_$(version)-1_all.deb
-
-deb-sanity-check-prepare::
 
 dist/$(PROJECT)_$(version)-1_all.deb: dist/$(PROJECT)_$(version)-1.dsc
 	cd dist/$(PROJECT)-$(version) && dpkg-buildpackage -b -us -uc
