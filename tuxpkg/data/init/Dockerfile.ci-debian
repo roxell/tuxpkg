@@ -8,6 +8,7 @@ RUN apt-get update \
     && apt-get install -qy auto-apt-proxy \
     && apt-get install -q=2 \
         black \
+        ca-certificates \
         codespell \
         flake8 \
         flit \
