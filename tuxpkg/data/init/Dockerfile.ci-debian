@@ -21,7 +21,7 @@ RUN apt-get update \
 RUN if grep '^Source: tuxpkg' /tuxpkg/debian/control; then exit; fi; \
     /usr/lib/apt/apt-helper download-file https://linaro.gitlab.io/tuxpkg/packages/signing-key.gpg /etc/apt/trusted.gpg.d/tuxpkg.gpg \
     && echo 'deb https://linaro.gitlab.io/tuxpkg/packages/ ./' > /etc/apt/sources.list.d/tuxpkg.list \
-    && make -C /tuxpkg deb-sanity-test-prepare \
+    && make -C /tuxpkg deb-sanity-check-prepare \
     && apt-get update \
     && apt-get install -q=2 -y tuxpkg \
     && apt-get build-dep -qy /tuxpkg \

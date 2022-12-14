@@ -69,14 +69,14 @@ rpm:
     paths:
       - dist/*.rpm
 
-rpm-sanity-test:
+rpm-sanity-check:
   stage: test
   image: fedora
   needs:
     - rpm
   script:
     - dnf install -y make
-    - make rpm-sanity-test-prepare
+    - make rpm-sanity-check-prepare
     - dnf install -y ./dist/*.rpm
     - ${TUXPKG_PROJECT} --help
 
