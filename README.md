@@ -60,6 +60,7 @@ The following variables must be set as protected in the CI/CD configuration:
 
 - `TUXPKG_RELEASE_KEYID`: 
     - variable type: "Variable"
+    - variable options: "Protected"
     - the public gnupg key ID used to sign the package repositories. 
       The is the full GPG key id, e.g. `1EC68783C596C4AD1C2E45896D082F7024A0AEAF`.
   
@@ -69,6 +70,7 @@ The following variables must be set as protected in the CI/CD configuration:
 
 - `FLIT_PASSWORD`: 
     - variable type: "Variable"
+    - variable options: "Protected, Masked"
     - Generate a project-specific token on [pypi.org](https://pypi.org/)
   
     !!!note
@@ -76,6 +78,7 @@ The following variables must be set as protected in the CI/CD configuration:
 
 - `FLIT_USERNAME`:
     - variable type: "Variable"
+    - variable options: "Protected"
     - set value to  `__token__`
 
 
