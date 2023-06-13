@@ -6,6 +6,7 @@ variables:
   TUXPKG_PROJECT: tuxpkg
 
 doc:
+  image: $CI_REGISTRY_IMAGE:ci-debian
   stage: deploy
   artifacts:
     paths:
@@ -15,9 +16,10 @@ doc:
     - python3 -m pip install mkdocs-material
   script:
     - make doc
-  
+
 
 pages:
+  image: $CI_REGISTRY_IMAGE:ci-debian
   stage: deploy
   needs:
     - test

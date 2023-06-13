@@ -3,6 +3,7 @@ variables:
   PYTEST_ARGS: ""
 
 test:
+  image: $CI_REGISTRY_IMAGE:ci-debian
   stage: test
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   script:
@@ -15,7 +16,6 @@ test:
         coverage_format: cobertura
         path: coverage.xml
 
-image: $CI_REGISTRY_IMAGE:ci-debian
 
 ci-image-debian:
   stage: .pre
@@ -34,7 +34,6 @@ ci-image-debian:
        changes:
          - Dockerfile.ci-debian
          - debian/control
-         - debian/changelog
 
 ci-image-fedora:
   stage: .pre
@@ -81,6 +80,7 @@ rpm-sanity-check:
     - if command -v ${TUXPKG_PROJECT}; then ${TUXPKG_PROJECT} --help; fi
 
 deb:
+  image: $CI_REGISTRY_IMAGE:ci-debian
   stage: build
   variables:
     FLIT_NO_NETWORK: 1
@@ -108,6 +108,7 @@ deb-sanity-check:
 
 
 repository:
+  image: $CI_REGISTRY_IMAGE:ci-debian
   only:
     - tags
   needs:
@@ -121,6 +122,7 @@ repository:
       - dist/repo
 
 pypi:
+  image: $CI_REGISTRY_IMAGE:ci-debian
   only:
     - tags
   stage: deploy
