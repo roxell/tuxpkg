@@ -15,6 +15,7 @@ RUN apt-get update \
         git \
         make \
         mkdocs \
+        mkdocs-material \
         mypy \
         ${EXTRA_PACKAGES} \
     && true
