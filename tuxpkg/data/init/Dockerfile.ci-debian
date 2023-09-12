@@ -26,5 +26,6 @@ RUN if grep '^Source: tuxpkg' /tuxpkg/debian/control; then exit; fi; \
     && apt-get update \
     && apt-get install -q=2 -y tuxpkg \
     && apt-get build-dep -qy /tuxpkg \
+    && rm -rf /tmp/*
 
 # vim: ft=dockerfile
