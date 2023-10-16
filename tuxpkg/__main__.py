@@ -54,6 +54,11 @@ def main():
         help="Creates Debian and RPM repository from files in dist/.",
     )
 
+    commands.add_command(
+        "check-repository-key",
+        help="Checks expiration of the repository signing key. Fails if the keys is expired or will expire in less than 90 days",
+    )
+
     commands.add_command("release", help="Makes a release")
     commands.add_command("init", help="Initializes a project directory")
 

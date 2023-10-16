@@ -31,6 +31,7 @@ class RunScript(FileAction):
 
 
 create_repository = RunScript("create-repository")
+check_repository_key = RunScript("check-repository-key")
 release = RunScript("release")
 
 

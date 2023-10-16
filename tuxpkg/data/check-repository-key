@@ -1,0 +1,17 @@
+#!/bin/sh
+
+set -eu
+
+expiration=$(gpg -K --with-colons ${TUXPKG_RELEASE_KEY:-} | awk -F : '{print($7); exit}')
+now=$(date +%s)
+days=$(( (expiration - now) / (24*60*60)))
+if [ $days -lt 90 ]; then
+  if [ $days -gt 0 ]; then
+    echo "E: Signing key will expire in ${days} days."
+  else
+    echo "E: Signing key is expired."
+  fi
+  exit 1
+else
+  echo "I: Signing key is OK, expiration in ${days} days."
+fi
