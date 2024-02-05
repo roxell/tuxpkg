@@ -61,6 +61,9 @@ check-repository-key:
     - ${TUXPKG} check-repository-key
 
 rpm:
+  rules:
+     - if: $SKIP_BUILD_RPM == "1"
+       when: never
   stage: build
   image: $CI_REGISTRY_IMAGE:ci-fedora
   variables:
@@ -76,6 +79,9 @@ rpm:
       - dist/*.rpm
 
 rpm-sanity-check:
+  rules:
+     - if: $SKIP_BUILD_RPM == "1"
+       when: never
   stage: test
   image: fedora
   needs:
@@ -87,6 +93,9 @@ rpm-sanity-check:
     - if command -v ${TUXPKG_PROJECT}; then ${TUXPKG_PROJECT} --help; fi
 
 deb:
+  rules:
+     - if: $SKIP_BUILD_DEB == "1"
+       when: never
   image: $CI_REGISTRY_IMAGE:ci-debian
   stage: build
   variables:
@@ -102,6 +111,9 @@ deb:
       - dist/*.deb
 
 deb-sanity-check:
+  rules:
+     - if: $SKIP_BUILD_DEB == "1"
+       when: never
   stage: test
   image: debian
   needs:
@@ -115,9 +127,12 @@ deb-sanity-check:
 
 
 repository:
+  rules:
+     - if: $SKIP_BUILD_DEB == "1" && $SKIP_BUILD_RPM == "1"
+       when: never
+     - if: ! $CI_COMMIT_TAG
+       when: never
   image: $CI_REGISTRY_IMAGE:ci-debian
-  only:
-    - tags
   needs:
     - deb
     - rpm
@@ -136,7 +151,6 @@ pypi:
   stage: deploy
   needs:
     - test
-    - repository
   variables:
     FLIT_USERNAME: __token__
   script:
