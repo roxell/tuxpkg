@@ -7,7 +7,7 @@ WORKERS="--workers=$(NUM_WORKERS)"
 endif
 
 test:
-	python3 -m pytest $(WORKERS) --cov=$(MODULE) --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=$(TUXPKG_MIN_COVERAGE) $(TUXPKG_PYTEST_OPTIONS)
+	python3 -m pytest $(WORKERS) --cov=$(MODULE) --cov-report=term-missing --cov-report=html --cov-report=xml:coverage.xml --cov-fail-under=$(TUXPKG_MIN_COVERAGE) $(TUXPKG_PYTEST_OPTIONS)
 
 style:
 	black --check --diff $(TUXPKG_BLACK_OPTIONS) .
