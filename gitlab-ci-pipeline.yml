@@ -128,7 +128,7 @@ deb-sanity-check:
 
 repository:
   rules:
-    - if: $SKIP_BUILD_RPM != "1" && $SKIP_BUILD_DEB != "1" && $CI_COMMIT_TAG != null
+    - if: $SKIP_BUILD_RPM != "1" && $SKIP_BUILD_DEB != "1" && $CI_COMMIT_TAG != null && $TUXPKG_RELEASE_KEY != null && $TUXPKG_RELEASE_KEYID != null
   image: $CI_REGISTRY_IMAGE:ci-debian
   needs:
     - deb
@@ -142,6 +142,8 @@ repository:
       - dist/repo
 
 pypi:
+  rules:
+    - if: $FLIT_USERNAME != null && $FLIT_PASSWORD != null
   image: $CI_REGISTRY_IMAGE:ci-debian
   only:
     - tags
