@@ -143,10 +143,8 @@ repository:
 
 pypi:
   rules:
-    - if: $FLIT_USERNAME != null && $FLIT_PASSWORD != null
+    - if: $CI_COMMIT_TAG && $FLIT_USERNAME != null && $FLIT_PASSWORD != null
   image: $CI_REGISTRY_IMAGE:ci-debian
-  only:
-    - tags
   stage: deploy
   needs:
     - test
