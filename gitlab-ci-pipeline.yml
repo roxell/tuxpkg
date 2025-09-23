@@ -3,6 +3,8 @@ variables:
   PYTEST_ARGS: ""
 
 test:
+  rules:
+    - when: always
   image: $CI_REGISTRY_IMAGE:ci-debian
   stage: test
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
