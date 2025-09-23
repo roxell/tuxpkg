@@ -41,9 +41,26 @@ read -p "Press ENTER to release version ${version} with the release notes above,
 sed -i -e "s/^__version__.*/__version__ = \"${version}\"/" ${MODULE}/__init__.py
 if [ -f "${PROJECT}.spec" ]; then
     sed -i -e "s/^Version:.*/Version:   ${version}/" ${PROJECT}.spec
+    # Update %changelog section with link to release tag
+    if grep -q "^%changelog" "${PROJECT}.spec"; then
+        sed -i "/^%changelog/a\\
+* $(date "+%a %b %d %Y") $(git config user.name) <$(git config user.email)> - ${version}-1\\
+- Release ${version}. See: $(git config --get remote.origin.url | sed 's|\.git$||; s|:|/|; s|git@|https://|')/-/tags/v${version}\\
+" "${PROJECT}.spec"
+    fi
 fi
 if [ -f debian/changelog ]; then
-    sed -i -e "1 { s/(.*)/(${version}-1)/ }" debian/changelog
+    # Create new changelog entry with link to release tag
+    {
+        echo "${PROJECT} (${version}-1) UNRELEASED; urgency=medium"
+        echo ""
+        echo "  * Release ${version}. See: $(git config --get remote.origin.url | sed 's|\.git$||; s|:|/|; s|git@|https://|')/-/tags/v${version}"
+        echo ""
+        echo " -- $(git config user.name) <$(git config user.email)>  $(date -R)"
+        echo ""
+        cat debian/changelog
+    } > debian/changelog.new
+    mv debian/changelog.new debian/changelog
 fi
 $git commit -s -a -m "Release ${version}"
 
