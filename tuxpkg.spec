@@ -1,5 +1,5 @@
 Name:      tuxpkg
-Version:   0.16.0
+Version:   0.17.0
 Release:   0%{?dist}
 Summary:   release automation tool for Python projects
 License:   Expat
@@ -61,6 +61,9 @@ ln -sf ../share/%{name}/run %{buildroot}/usr/bin/%{name}
 %license LICENSE
 
 %changelog
+* Fri Nov 21 2025 Ben Copeland <ben.copeland@linaro.org> - 0.17.0-1
+- Release 0.17.0. See: https://gitlab.com/Linaro/tuxpkg/-/tags/v0.17.0
+
 
 * Tue Oct 05 2021 Antonio Terceiro <antonio.terceiro@linaro.org> - 0.0.1-1
 - Initial version of the package
