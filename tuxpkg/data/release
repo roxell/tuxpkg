@@ -2,6 +2,19 @@
 
 set -eu
 
+# Detect git hosting platform and set the appropriate tag URL pattern
+remote_url=$(git config --get remote.origin.url)
+case "${remote_url}" in
+    *github.com*)
+        # GitHub uses /releases/tag/vX.Y.Z
+        tag_url_suffix="/releases/tag"
+        ;;
+    *)
+        # GitLab uses /-/tags/vX.Y.Z
+        tag_url_suffix="/-/tags"
+        ;;
+esac
+
 current_version=$(python3 -c "import ${MODULE}; print(${MODULE}.__version__)")
 version=${VERSION:-}
 if [ -z "${version}" ]; then
@@ -45,7 +58,7 @@ if [ -f "${PROJECT}.spec" ]; then
     if grep -q "^%changelog" "${PROJECT}.spec"; then
         sed -i "/^%changelog/a\\
 * $(date "+%a %b %d %Y") $(git config user.name) <$(git config user.email)> - ${version}-1\\
-- Release ${version}. See: $(git config --get remote.origin.url | sed 's|\.git$||; s|:|/|; s|git@|https://|')/-/tags/v${version}\\
+- Release ${version}. See: $(git config --get remote.origin.url | sed 's|\.git$||; s|:|/|; s|git@|https://|')${tag_url_suffix}/v${version}\\
 " "${PROJECT}.spec"
     fi
 fi
@@ -54,7 +67,7 @@ if [ -f debian/changelog ]; then
     {
         echo "${PROJECT} (${version}-1) UNRELEASED; urgency=medium"
         echo ""
-        echo "  * Release ${version}. See: $(git config --get remote.origin.url | sed 's|\.git$||; s|:|/|; s|git@|https://|')/-/tags/v${version}"
+        echo "  * Release ${version}. See: $(git config --get remote.origin.url | sed 's|\.git$||; s|:|/|; s|git@|https://|')${tag_url_suffix}/v${version}"
         echo ""
         echo " -- $(git config user.name) <$(git config user.email)>  $(date -R)"
         echo ""
