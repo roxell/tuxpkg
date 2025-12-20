@@ -59,6 +59,7 @@ jobs:
         run: |
           apt-get update -q
           apt-get install -qy python3-pip python3-venv make git
+          pip3 install --break-system-packages git+https://gitlab.com/aroxell/tuxpkg.git@main
           apt-get build-dep -qy . || true
       - name: Run tests
         run: make test
@@ -80,6 +81,7 @@ jobs:
         run: |
           apt-get update -q
           apt-get install -qy python3-pip python3-venv make dpkg-dev git
+          pip3 install --break-system-packages git+https://gitlab.com/aroxell/tuxpkg.git@main
           apt-get build-dep -qy . || true
       - name: Build Debian package
         run: |
@@ -127,7 +129,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install dependencies
         run: |
-          dnf install -y make git rpm-build
+          dnf install -y python3-pip python3-jinja2 make git rpm-build
+          # Remove RPM tuxpkg if installed to avoid conflicts with pip
+          dnf remove -y tuxpkg || true
+          # Install tuxpkg to system site-packages (/usr/lib/pythonX.Y/) instead of
+          # /usr/local/ because rpmbuild environment doesn't include /usr/local/ paths
+          python3 -m pip install --prefix=/usr git+https://gitlab.com/aroxell/tuxpkg.git@main
+          # Verify tuxpkg works
+          tuxpkg --version
           dnf builddep -y *.spec
       - name: Build RPM package
         run: |
