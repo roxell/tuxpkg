@@ -1,11 +1,13 @@
 import os
 
 from pathlib import Path
+from tuxpkg import actions
 from tuxpkg.actions import Action
 from tuxpkg.actions import PointToFile
 from tuxpkg.actions import RunScript
 from tuxpkg.actions import CopyDirectory
 from tuxpkg.actions import CompositeAction
+from tuxpkg.actions import detect_platform
 
 
 class TestAction:
@@ -72,6 +74,68 @@ class TestCopyDirectory:
 
         assert (tmp_path / "Makefile").read_text() == ""
         assert (tmp_path / "Dockerfile.ci-fedora").read_text() == ""
+
+
+class TestCopyDirectoryPlatform:
+    def test_copies_gitlab_ci_for_gitlab_platform(self, tmp_path):
+        cwd = os.getcwd()
+        actions.init_platform = "gitlab"
+        try:
+            os.chdir(tmp_path)
+            action = CopyDirectory("init")
+            action()
+        finally:
+            os.chdir(cwd)
+            actions.init_platform = "auto"
+
+        # GitLab CI file should exist
+        assert (tmp_path / ".gitlab-ci.yml").exists()
+        # GitHub Actions should NOT exist
+        assert not (tmp_path / ".github").exists()
+
+    def test_copies_github_actions_for_github_platform(self, tmp_path):
+        cwd = os.getcwd()
+        actions.init_platform = "github"
+        try:
+            os.chdir(tmp_path)
+            action = CopyDirectory("init")
+            action()
+        finally:
+            os.chdir(cwd)
+            actions.init_platform = "auto"
+
+        # GitHub Actions should exist
+        assert (tmp_path / ".github" / "workflows" / "ci.yml").exists()
+        # GitLab CI file should NOT exist
+        assert not (tmp_path / ".gitlab-ci.yml").exists()
+
+
+class TestDetectPlatform:
+    def test_detect_gitlab_by_default(self, mocker):
+        # When git command fails or returns non-github URL
+        mocker.patch(
+            "subprocess.run",
+            return_value=mocker.Mock(stdout="git@gitlab.com:Linaro/tuxpkg.git\n"),
+        )
+        assert detect_platform() == "gitlab"
+
+    def test_detect_github_from_ssh_url(self, mocker):
+        mocker.patch(
+            "subprocess.run",
+            return_value=mocker.Mock(stdout="git@github.com:user/repo.git\n"),
+        )
+        assert detect_platform() == "github"
+
+    def test_detect_github_from_https_url(self, mocker):
+        mocker.patch(
+            "subprocess.run",
+            return_value=mocker.Mock(stdout="https://github.com/user/repo.git\n"),
+        )
+        assert detect_platform() == "github"
+
+    def test_detect_gitlab_on_exception(self, mocker):
+        mocker.patch("subprocess.run", side_effect=Exception("git not found"))
+        assert detect_platform() == "gitlab"
 
 
 class TestCompositeAction:
