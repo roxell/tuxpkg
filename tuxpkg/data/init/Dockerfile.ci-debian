@@ -1,4 +1,4 @@
-FROM debian
+FROM debian:trixie
 ARG EXTRA_PACKAGES
 
 COPY debian/control /tuxpkg/debian/control
