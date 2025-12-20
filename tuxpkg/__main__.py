@@ -60,9 +60,18 @@ def main():
     )
 
     commands.add_command("release", help="Makes a release")
-    commands.add_command("init", help="Initializes a project directory")
+    init_cmd = commands.add_command("init", help="Initializes a project directory")
+    init_cmd.add_argument(
+        "--platform",
+        choices=["auto", "github", "gitlab"],
+        default="auto",
+        help="Target CI/CD platform. 'auto' detects from git remote (default: auto)",
+    )
 
     options = parser.parse_args(sys.argv[1:])
+    # Handle platform option for init command
+    if hasattr(options, "platform"):
+        actions.init_platform = options.platform
     options.func()
 
     return 0

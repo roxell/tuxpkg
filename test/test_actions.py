@@ -1,11 +1,15 @@
 import os
+import subprocess
 
+import pytest
 from pathlib import Path
+from tuxpkg import actions
 from tuxpkg.actions import Action
 from tuxpkg.actions import PointToFile
 from tuxpkg.actions import RunScript
 from tuxpkg.actions import CopyDirectory
 from tuxpkg.actions import CompositeAction
+from tuxpkg.actions import detect_platform
 
 
 class TestAction:
@@ -38,12 +42,14 @@ class TestRunScript:
 class TestCopyDirectory:
     def test_copies_files(self, tmp_path):
         cwd = os.getcwd()
+        actions.init_platform = "gitlab"
         try:
             os.chdir(tmp_path)
             action = CopyDirectory("init")
             action()
         finally:
             os.chdir(cwd)
+            actions.init_platform = "auto"
 
         # copies files
         assert (tmp_path / "Dockerfile.ci-fedora").exists()
@@ -61,6 +67,7 @@ class TestCopyDirectory:
 
     def test_wont_override_existing_files(self, tmp_path):
         cwd = os.getcwd()
+        actions.init_platform = "gitlab"
         try:
             os.chdir(tmp_path)
             Path("Makefile").write_text("")  # template
@@ -69,9 +76,96 @@ class TestCopyDirectory:
             action()
         finally:
             os.chdir(cwd)
+            actions.init_platform = "auto"
 
         assert (tmp_path / "Makefile").read_text() == ""
         assert (tmp_path / "Dockerfile.ci-fedora").read_text() == ""
+
+
+class TestCopyDirectoryPlatform:
+    def test_copies_gitlab_ci_for_gitlab_platform(self, tmp_path):
+        cwd = os.getcwd()
+        actions.init_platform = "gitlab"
+        try:
+            os.chdir(tmp_path)
+            action = CopyDirectory("init")
+            action()
+        finally:
+            os.chdir(cwd)
+            actions.init_platform = "auto"
+
+        # GitLab CI file should exist
+        assert (tmp_path / ".gitlab-ci.yml").exists()
+        # GitHub Actions should NOT exist
+        assert not (tmp_path / ".github").exists()
+
+    def test_copies_github_actions_for_github_platform(self, tmp_path):
+        cwd = os.getcwd()
+        actions.init_platform = "github"
+        try:
+            os.chdir(tmp_path)
+            action = CopyDirectory("init")
+            action()
+        finally:
+            os.chdir(cwd)
+            actions.init_platform = "auto"
+
+        # GitHub Actions should exist
+        assert (tmp_path / ".github" / "workflows" / "ci.yml").exists()
+        # GitLab CI file should NOT exist
+        assert not (tmp_path / ".gitlab-ci.yml").exists()
+
+    def test_auto_detects_platform(self, tmp_path, mocker):
+        mocker.patch("tuxpkg.actions.detect_platform", return_value="github")
+        cwd = os.getcwd()
+        # Ensure init_platform is "auto" to trigger detect_platform()
+        assert actions.init_platform == "auto"
+        try:
+            os.chdir(tmp_path)
+            action = CopyDirectory("init")
+            action()
+        finally:
+            os.chdir(cwd)
+
+        # Verify detect_platform was used and returned github
+        assert action.platform == "github"
+
+
+class TestDetectPlatform:
+    def test_detect_gitlab_by_default(self, mocker):
+        # When git command fails or returns non-github URL
+        mocker.patch(
+            "subprocess.run",
+            return_value=mocker.Mock(stdout="git@gitlab.com:Linaro/tuxpkg.git\n"),
+        )
+        assert detect_platform() == "gitlab"
+
+    def test_detect_github_from_ssh_url(self, mocker):
+        mocker.patch(
+            "subprocess.run",
+            return_value=mocker.Mock(stdout="git@github.com:user/repo.git\n"),
+        )
+        assert detect_platform() == "github"
+
+    def test_detect_github_from_https_url(self, mocker):
+        mocker.patch(
+            "subprocess.run",
+            return_value=mocker.Mock(stdout="https://github.com/user/repo.git\n"),
+        )
+        assert detect_platform() == "github"
+
+    def test_raises_error_when_no_remote(self, mocker):
+        mocker.patch(
+            "subprocess.run",
+            side_effect=subprocess.CalledProcessError(1, "git"),
+        )
+        with pytest.raises(RuntimeError, match="no git remote configured"):
+            detect_platform()
+
+    def test_raises_error_when_git_not_installed(self, mocker):
+        mocker.patch("subprocess.run", side_effect=FileNotFoundError())
+        with pytest.raises(RuntimeError, match="git is not installed"):
+            detect_platform()
 
 
 class TestCompositeAction:
