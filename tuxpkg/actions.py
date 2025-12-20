@@ -1,8 +1,33 @@
 from datetime import datetime
 import os
+import subprocess
 from jinja2 import Template
 from pathlib import Path
 import shutil
+
+# Global variable to store platform preference for init command
+init_platform: str = "auto"
+
+
+def detect_platform() -> str:
+    try:
+        result = subprocess.run(
+            ["git", "config", "--get", "remote.origin.url"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except FileNotFoundError:
+        raise RuntimeError("git is not installed")
+    except subprocess.CalledProcessError:
+        raise RuntimeError(
+            "Failed to detect platform: no git remote configured. "
+            "Use --platform to specify github or gitlab."
+        )
+    remote_url = result.stdout.strip()
+    if "github.com" in remote_url:
+        return "github"
+    return "gitlab"
 
 
 class Action:
@@ -45,6 +70,11 @@ class CopyDirectory(FileAction):
         }
 
     def __call__(self) -> None:
+        if init_platform == "auto":
+            self.platform = detect_platform()
+        else:
+            self.platform = init_platform
+
         cwd = os.getcwd()
         os.chdir(self.source_path)
         try:
@@ -53,7 +83,20 @@ class CopyDirectory(FileAction):
         finally:
             os.chdir(cwd)
 
+    def should_skip_for_platform(self, source: Path) -> bool:
+        source_str = str(source)
+        if self.platform == "github":
+            if ".gitlab-ci.yml" in source_str:
+                return True
+        else:
+            if ".github" in source_str:
+                return True
+        return False
+
     def copy(self, source: Path, target: Path) -> None:
+        if self.should_skip_for_platform(source):
+            return
+
         if source.is_dir():
             (target / self.render(str(source))).mkdir(exist_ok=True)
             for child in source.iterdir():
