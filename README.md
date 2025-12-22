@@ -101,3 +101,13 @@ variables:
 Variables that can be overriden locally:
 
 - `TUXPKG`: how to call tuxpkg. Default: `tuxpkg`.
+
+
+
+# GitHub Actions
+
+When using GitHub Actions, two additional settings must be configured:
+
+1. **Enable GitHub Pages**: Settings -> Pages -> Source: **GitHub Actions**
+
+2. **Allow tag deployments**: Settings -> Environments -> github-pages -> Add deployment rule for `v*` tags
