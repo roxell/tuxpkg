@@ -1,0 +1,224 @@
+# Reusable GitHub Actions workflow for tuxpkg projects
+# Include this in your project's .github/workflows/ci.yml using:
+#
+#   jobs:
+#     call-tuxpkg:
+#       uses: Linaro/tuxpkg/.github/workflows/tuxpkg.yml@main
+#       secrets: inherit
+
+name: tuxpkg CI/CD Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      tuxpkg_project:
+        description: 'Project name for tuxpkg'
+        required: false
+        type: string
+        default: ''
+      ci_image_debian:
+        description: 'Debian CI image (ghcr.io/owner/repo:ci-debian)'
+        required: false
+        type: string
+        default: ''
+      ci_image_fedora:
+        description: 'Fedora CI image (ghcr.io/owner/repo:ci-fedora)'
+        required: false
+        type: string
+        default: ''
+      skip_build_deb:
+        description: 'Skip building Debian package'
+        required: false
+        type: boolean
+        default: false
+      skip_build_rpm:
+        description: 'Skip building RPM package'
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      TUXPKG_RELEASE_KEY:
+        required: false
+      TUXPKG_RELEASE_KEYID:
+        required: false
+      FLIT_PASSWORD:
+        required: false
+
+env:
+  TUXPKG: tuxpkg
+  TUXPKG_PROJECT: ${{ inputs.tuxpkg_project }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ inputs.ci_image_debian }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          apt-get update -q
+          apt-get install -qy python3-pip python3-venv make git
+          apt-get build-dep -qy . || true
+      - name: Run tests
+        run: make test
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
+
+  deb:
+    if: ${{ !inputs.skip_build_deb }}
+    needs: test
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ inputs.ci_image_debian }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          apt-get update -q
+          apt-get install -qy python3-pip python3-venv make dpkg-dev git
+          apt-get build-dep -qy . || true
+      - name: Build Debian package
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          export FLIT_NO_NETWORK=1
+          make deb
+      - name: Show package info
+        run: |
+          dpkg --info dist/*.deb
+          dpkg --contents dist/*.deb
+      - name: Upload Debian package
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-package
+          path: dist/*.deb
+
+  deb-sanity-check:
+    if: ${{ !inputs.skip_build_deb }}
+    needs: deb
+    runs-on: ubuntu-latest
+    container:
+      image: debian:bookworm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Debian package
+        uses: actions/download-artifact@v4
+        with:
+          name: deb-package
+          path: dist/
+      - name: Install and test package
+        run: |
+          apt-get update -q
+          apt-get install -qy make
+          if grep -q '^deb-sanity-check-prepare:' Makefile; then make deb-sanity-check-prepare; fi
+          apt-get install -qy ./dist/*.deb
+          if [ -n "${TUXPKG_PROJECT}" ] && command -v ${TUXPKG_PROJECT}; then ${TUXPKG_PROJECT} --help; fi
+
+  rpm:
+    if: ${{ !inputs.skip_build_rpm }}
+    needs: test
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ inputs.ci_image_fedora }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          dnf install -y make git rpm-build
+          dnf builddep -y *.spec
+      - name: Build RPM package
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          export FLIT_NO_NETWORK=1
+          make rpm
+      - name: Show package info
+        run: |
+          rpm --query --info dist/*.rpm
+          rpm --query --requires dist/*.rpm
+          rpm --query --list dist/*.rpm
+      - name: Upload RPM package
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpm-package
+          path: dist/*.rpm
+
+  rpm-sanity-check:
+    if: ${{ !inputs.skip_build_rpm }}
+    needs: rpm
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download RPM package
+        uses: actions/download-artifact@v4
+        with:
+          name: rpm-package
+          path: dist/
+      - name: Install and test package
+        run: |
+          dnf install -y make
+          if grep -q '^rpm-sanity-check-prepare:' Makefile; then make rpm-sanity-check-prepare; fi
+          dnf install -y ./dist/*.rpm
+          if [ -n "${TUXPKG_PROJECT}" ] && command -v ${TUXPKG_PROJECT}; then ${TUXPKG_PROJECT} --help; fi
+
+  repository:
+    if: ${{ github.ref_type == 'tag' && !inputs.skip_build_deb && !inputs.skip_build_rpm }}
+    needs: [deb, rpm]
+    runs-on: ubuntu-latest
+    container:
+      image: debian:bookworm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download packages
+        uses: actions/download-artifact@v4
+        with:
+          path: dist/
+          merge-multiple: true
+      - name: Install tuxpkg
+        run: |
+          apt-get update -q
+          apt-get install -qy python3-pip createrepo-c rpm gpg gpg-agent apt-utils
+          pip3 install --break-system-packages tuxpkg
+      - name: Import GPG key
+        if: ${{ env.TUXPKG_RELEASE_KEY != '' }}
+        env:
+          TUXPKG_RELEASE_KEY: ${{ secrets.TUXPKG_RELEASE_KEY }}
+          TUXPKG_RELEASE_KEYID: ${{ secrets.TUXPKG_RELEASE_KEYID }}
+        run: |
+          echo "${TUXPKG_RELEASE_KEY}" | gpg --import
+      - name: Create repository
+        env:
+          TUXPKG_RELEASE_KEYID: ${{ secrets.TUXPKG_RELEASE_KEYID }}
+        run: ${TUXPKG} create-repository
+      - name: Upload repository
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository
+          path: dist/repo
+
+  pypi:
+    if: ${{ github.ref_type == 'tag' }}
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install flit
+        run: pip install flit
+      - name: Publish to PyPI
+        env:
+          FLIT_USERNAME: __token__
+          FLIT_PASSWORD: ${{ secrets.FLIT_PASSWORD }}
+        run: |
+          if [ -z "${FLIT_PASSWORD}" ]; then
+            echo "FLIT_PASSWORD not set, skipping PyPI publish"
+            exit 0
+          fi
+          flit publish
