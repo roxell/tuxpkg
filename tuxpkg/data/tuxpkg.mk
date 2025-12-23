@@ -13,7 +13,7 @@ style:
 	black --check --diff $(TUXPKG_BLACK_OPTIONS) .
 
 flake8:
-	flake8 --exclude=dist/ --ignore=E501,W503 $(TUXPKG_FLAKE8_OPTIONS) .
+	flake8 --exclude=dist/ --exclude=.venv/ --ignore=E501,W503 $(TUXPKG_FLAKE8_OPTIONS) .
 
 typecheck:
 	mypy --exclude=dist/ $(TUXPKG_MYPY_OPTIONS) .
