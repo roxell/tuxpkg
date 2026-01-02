@@ -62,6 +62,7 @@ class TestCopyDirectory:
         assert (tmp_path / name / "__init__.py").exists()
         # template expansion in template names
         assert (tmp_path / name).with_suffix(".spec").exists()
+        assert (tmp_path / name).with_suffix(".PKGBUILD").exists()
         # file mode
         assert os.access(str(tmp_path / "debian" / "rules"), os.X_OK)
 
