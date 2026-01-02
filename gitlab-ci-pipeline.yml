@@ -55,6 +55,25 @@ ci-image-fedora:
          - Dockerfile.ci-fedora
          - '*.spec'
 
+ci-image-archlinux:
+  stage: .pre
+  image: docker:20.10-dind
+  services:
+  - name: docker:20.10-dind
+  variables:
+    DOCKER_DRIVER: overlay2
+  script:
+    - 'docker build -t $CI_REGISTRY_IMAGE:ci-archlinux -f Dockerfile.ci-archlinux .'
+    - 'docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY'
+    - 'docker push $CI_REGISTRY_IMAGE:ci-archlinux'
+  rules:
+     - if: $CI_PIPELINE_SOURCE == "schedule"
+     - if: $CI_COMMIT_BRANCH == "master" || $CI_COMMIT_BRANCH == "main"
+       changes:
+         - Dockerfile.ci-archlinux
+         - tuxpkg/data/init/Dockerfile.ci-archlinux
+         - '*.PKGBUILD'
+
 check-repository-key:
   stage: deploy
   image: $CI_REGISTRY_IMAGE:ci-debian
@@ -127,6 +146,32 @@ deb-sanity-check:
     - apt-get install -qy ./dist/*.deb
     - if command -v ${TUXPKG_PROJECT}; then ${TUXPKG_PROJECT} --help; fi
 
+pkg:
+  rules:
+    - if: $SKIP_BUILD_PKG != "1"
+  stage: deploy
+  image: $CI_REGISTRY_IMAGE:ci-archlinux
+  needs:
+    - test
+  script:
+    - chown -R build:build .
+    - su build -c "git config --global --add safe.directory ${CI_PROJECT_DIR}; make pkg"
+  artifacts:
+    paths:
+      - dist/*.pkg.tar.zst
+
+pkg-sanity-check:
+  rules:
+    - if: $SKIP_BUILD_PKG != "1"
+  stage: deploy
+  image: archlinux:base
+  needs:
+    - pkg
+  script:
+    - pacman -Syyu --noconfirm make
+    - if grep -q '^pkg-sanity-check-prepare:' Makefile; then make pkg-sanity-check-prepare; fi
+    - pacman -U --noconfirm ./dist/*.pkg.tar.zst
+    - if command -v ${TUXPKG_PROJECT}; then ${TUXPKG_PROJECT} --help; fi
 
 repository:
   rules:
