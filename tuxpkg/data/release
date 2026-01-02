@@ -75,6 +75,9 @@ if [ -f debian/changelog ]; then
     } > debian/changelog.new
     mv debian/changelog.new debian/changelog
 fi
+if [ -f "${PROJECT}.PKGBUILD" ]; then
+    sed -i -e "s/^pkgver=.*/pkgver=${version}/" ${PROJECT}.PKGBUILD
+fi
 $git commit -s -a -m "Release ${version}"
 
 $git tag --sign --file=${relnotes} v${version}
