@@ -210,7 +210,7 @@ jobs:
           path: dist/repo
 
   pypi:
-    if: ${{ github.ref_type == 'tag' && secrets.FLIT_PASSWORD != '' }}
+    if: ${{ github.ref_type == 'tag' }}
     needs: test
     runs-on: ubuntu-latest
     steps:
@@ -225,4 +225,9 @@ jobs:
         env:
           FLIT_USERNAME: __token__
           FLIT_PASSWORD: ${{ secrets.FLIT_PASSWORD }}
-        run: flit publish
+        run: |
+          if [ -z "${FLIT_PASSWORD}" ]; then
+            echo "FLIT_PASSWORD not set, skipping PyPI publish"
+            exit 0
+          fi
+          flit publish
