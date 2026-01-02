@@ -45,6 +45,16 @@ apt-ftparchive -o APT::FTPArchive::Release::Origin=${project} release . > Releas
 $gpg --detach-sign --output Release.gpg Release
 $gpg --clearsign --output InRelease Release
 
+# arch
+if command -v repo-add >/dev/null 2>&1; then
+    for pkg in *.pkg.tar.*; do
+        $gpg --detach-sign --output ${pkg}.sig ${pkg}
+    done
+    repo-add -s -k ${TUXPKG_RELEASE_KEYID} ${project}.db.tar.gz *.pkg.tar.*
+else
+    echo "W: repo-add not found, skipping Arch Linux repository creation"
+    echo "W: Arch packages are available for manual download"
+fi
 
 cat > index.html <<EOF
 <html>

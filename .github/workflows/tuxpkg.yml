@@ -26,6 +26,11 @@ on:
         required: false
         type: string
         default: ''
+      ci_image_archlinux:
+        description: 'Arch Linux CI image (ghcr.io/owner/repo:ci-archlinux)'
+        required: false
+        type: string
+        default: ''
       skip_build_deb:
         description: 'Skip building Debian package'
         required: false
@@ -33,6 +38,11 @@ on:
         default: false
       skip_build_rpm:
         description: 'Skip building RPM package'
+        required: false
+        type: boolean
+        default: false
+      skip_build_pkg:
+        description: 'Skip building Arch Linux package'
         required: false
         type: boolean
         default: false
@@ -165,9 +175,59 @@ jobs:
           dnf install -y ./dist/*.rpm
           if [ -n "${TUXPKG_PROJECT}" ] && command -v ${TUXPKG_PROJECT}; then ${TUXPKG_PROJECT} --help; fi
 
+  pkg:
+    if: ${{ !inputs.skip_build_pkg }}
+    needs: test
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ inputs.ci_image_archlinux || 'archlinux:base-devel' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        if: ${{ !inputs.ci_image_archlinux }}
+        run: |
+          sed -i '/^NoExtract/d' /etc/pacman.conf
+          pacman -Syyu --noconfirm glibc
+          pacman -S --noconfirm git python-flit python-pytest python-pytest-mock python-build python-installer python-wheel
+          echo "C.UTF-8 UTF-8" >/etc/locale.gen
+          locale-gen
+          useradd -m build
+          echo 'build ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/build
+      - name: Build Arch package
+        run: |
+          chown -R build:build .
+          su build -c "git config --global --add safe.directory ${GITHUB_WORKSPACE}; make pkg"
+      - name: Show package info
+        run: pacman -Qip dist/*.pkg.tar.zst
+      - name: Upload Arch package
+        uses: actions/upload-artifact@v4
+        with:
+          name: pkg-package
+          path: dist/*.pkg.tar.zst
+
+  pkg-sanity-check:
+    if: ${{ !inputs.skip_build_pkg }}
+    needs: pkg
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Arch package
+        uses: actions/download-artifact@v4
+        with:
+          name: pkg-package
+          path: dist/
+      - name: Install and test package
+        run: |
+          pacman -Syyu --noconfirm make
+          if grep -q '^pkg-sanity-check-prepare:' Makefile; then make pkg-sanity-check-prepare; fi
+          pacman -U --noconfirm ./dist/*.pkg.tar.zst
+          if [ -n "${TUXPKG_PROJECT}" ] && command -v ${TUXPKG_PROJECT}; then ${TUXPKG_PROJECT} --help; fi
+
   repository:
-    if: ${{ github.ref_type == 'tag' && !inputs.skip_build_deb && !inputs.skip_build_rpm }}
-    needs: [deb, rpm]
+    if: ${{ github.ref_type == 'tag' && !inputs.skip_build_deb && !inputs.skip_build_rpm && !inputs.skip_build_pkg }}
+    needs: [deb, rpm, pkg]
     runs-on: ubuntu-latest
     container:
       image: debian:bookworm
