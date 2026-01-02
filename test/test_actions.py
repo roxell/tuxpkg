@@ -53,6 +53,7 @@ class TestCopyDirectory:
 
         # copies files
         assert (tmp_path / "Dockerfile.ci-fedora").exists()
+        assert (tmp_path / "Dockerfile.ci-archlinux").exists()
         # subdirectories
         assert (tmp_path / "debian" / "rules").exists()
         # template expansion
