@@ -8,6 +8,7 @@ rm -rf ${repo}
 mkdir -p ${repo}
 cp dist/*.rpm ${repo}/
 cp dist/*.deb ${repo}/
+cp dist/*.pkg.tar.* ${repo}/
 cd ${repo}
 
 if [ -n "${TUXPKG_RELEASE_KEY:-}" ]; then
@@ -46,14 +47,59 @@ $gpg --detach-sign --output Release.gpg Release
 $gpg --clearsign --output InRelease Release
 
 # arch
+arch_pkg=$(ls *.pkg.tar.* 2>/dev/null | head -1)
 if command -v repo-add >/dev/null 2>&1; then
     for pkg in *.pkg.tar.*; do
         $gpg --detach-sign --output ${pkg}.sig ${pkg}
     done
     repo-add -s -k ${TUXPKG_RELEASE_KEYID} ${project}.db.tar.gz *.pkg.tar.*
+    arch_install_instructions="<p>
+1) Create /etc/pacman.d/${project}.conf with the following contents:
+</p>
+
+<pre class='replace'>
+[${project}]
+SigLevel = Optional TrustAll
+Server = {{REPOSITORY}}
+</pre>
+
+<p>
+2) Include it from /etc/pacman.conf. Add one line at the bottom:
+</p>
+
+<pre>
+Include = /etc/pacman.d/*.conf
+</pre>
+
+<p>
+If you already have this line, do nothing.
+</p>
+
+<p>
+3) Sync and install:
+</p>
+
+<pre>
+# pacman -Syu
+# pacman -S ${project}
+</pre>"
 else
-    echo "W: repo-add not found, skipping Arch Linux repository creation"
-    echo "W: Arch packages are available for manual download"
+    echo "W: repo-add not found, skipping Arch Linux repository database creation"
+    arch_install_instructions="<p>
+1) Download the package:
+</p>
+
+<pre class='replace'>
+# curl -LO {{REPOSITORY}}${arch_pkg}
+</pre>
+
+<p>
+2) Install ${project} as you would any other package:
+</p>
+
+<pre>
+# pacman -U ${arch_pkg}
+</pre>"
 fi
 
 cat > index.html <<EOF
@@ -134,7 +180,11 @@ enabled=1
 <p>
 Upgrades will be available in the same repository, so you can get them using
 the same procedure you already use to get other updates for your system.
-</pre>
+</p>
+
+<h2>Installing the Arch Linux packages</h2>
+
+${arch_install_instructions}
 <script type="text/javascript">
 
 function replace() {
