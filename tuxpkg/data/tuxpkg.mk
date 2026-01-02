@@ -36,6 +36,14 @@ rpmsrc: dist dist/$(PROJECT).spec
 dist/$(PROJECT).spec: $(PROJECT).spec
 	cp $(PROJECT).spec dist/
 
+pkg: dist/$(PROJECT)-$(version)-1-any.pkg.tar.zst
+
+dist/$(PROJECT)-$(version)-1-any.pkg.tar.zst: dist/$(PROJECT)-$(version).tar.gz dist/PKGBUILD
+	cd dist && makepkg --noconfirm -rs
+
+dist/PKGBUILD: $(PROJECT).PKGBUILD
+	cp $(PROJECT).PKGBUILD dist/PKGBUILD
+
 dist: dist/$(PROJECT)-$(version).tar.gz
 
 dist/$(PROJECT)-$(version).tar.gz:
