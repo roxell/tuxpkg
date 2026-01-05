@@ -2,4 +2,6 @@
 
 set -exu
 
-flit init
+if [ ! -f pyproject.toml ]; then
+    flit init
+fi
