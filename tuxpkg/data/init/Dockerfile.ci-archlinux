@@ -23,8 +23,9 @@ RUN useradd -m build \
     && echo 'build ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/build \
     && chown -R build:build /tuxpkg
 
-RUN echo -e '[tuxpkg]\nServer = https://linaro.gitlab.io/tuxpkg/packages/\nSigLevel = Optional TrustAll' >> /etc/pacman.conf \
-    && pacman -Sy --noconfirm tuxpkg \
+RUN pacman -S --noconfirm python-pip \
+        python-jinja \
+    && pip install --break-system-packages git+https://gitlab.com/Linaro/tuxpkg.git@main \
     && tuxpkg --version
 
 # vim: ft=dockerfile
