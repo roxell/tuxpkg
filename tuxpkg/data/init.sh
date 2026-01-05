@@ -2,6 +2,6 @@
 
 set -exu
 
-if [ ! -f pyproject.toml ]; then
+if [ ! -f pyproject.toml ] || [ "${TUXPKG_FORCE:-}" = "1" ]; then
     flit init
 fi

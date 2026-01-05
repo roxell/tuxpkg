@@ -67,11 +67,18 @@ def main():
         default="auto",
         help="Target CI/CD platform. 'auto' detects from git remote (default: auto)",
     )
+    init_cmd.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite existing files",
+    )
 
     options = parser.parse_args(sys.argv[1:])
     # Handle platform option for init command
     if hasattr(options, "platform"):
         actions.init_platform = options.platform
+    if hasattr(options, "force"):
+        actions.init_force = options.force
     options.func()
 
     return 0

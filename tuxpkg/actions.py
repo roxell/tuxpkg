@@ -5,8 +5,9 @@ from jinja2 import Template
 from pathlib import Path
 import shutil
 
-# Global variable to store platform preference for init command
+# Global variables to store init command options
 init_platform: str = "auto"
+init_force: bool = False
 
 
 def detect_platform() -> str:
@@ -52,6 +53,8 @@ get_debian_rules = PointToFile("debianrules.mk")
 
 class RunScript(FileAction):
     def __call__(self) -> None:
+        if init_force:
+            os.environ["TUXPKG_FORCE"] = "1"
         os.execv(str(self.source_path), [self.source])
 
 
@@ -110,21 +113,23 @@ class CopyDirectory(FileAction):
     def expand_template(self, source: Path, target: Path) -> None:
         destname = self.render(str(source.with_suffix("")))
         dest = target / destname
-        if dest.exists():
+        if dest.exists() and not init_force:
             print(f"  SKIP {destname} (already exists)")
             return
+        action = "UPDATE" if dest.exists() else "CREATE"
         dest.write_text(self.render(source.read_text()))
         dest.chmod(source.stat().st_mode)
-        print(f"CREATE {destname}")
+        print(f"{action} {destname}")
 
     def copy_file(self, source: Path, target: Path) -> None:
         destname = self.render(str(source))
         dest = target / destname
-        if dest.exists():
+        if dest.exists() and not init_force:
             print(f"  SKIP {destname} (already exists)")
             return
+        action = "UPDATE" if dest.exists() else "CREATE"
         shutil.copyfile(str(source), str(dest))
-        print(f"CREATE {destname}")
+        print(f"{action} {destname}")
 
     def render(self, template_text: str) -> str:
         template = Template(template_text)

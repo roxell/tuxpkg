@@ -83,6 +83,25 @@ class TestCopyDirectory:
         assert (tmp_path / "Makefile").read_text() == ""
         assert (tmp_path / "Dockerfile.ci-fedora").read_text() == ""
 
+    def test_force_overrides_existing_files(self, tmp_path):
+        cwd = os.getcwd()
+        actions.init_platform = "gitlab"
+        actions.init_force = True
+        try:
+            os.chdir(tmp_path)
+            Path("Makefile").write_text("")  # template
+            Path("Dockerfile.ci-fedora").write_text("")  # regular file
+            action = CopyDirectory("init")
+            action()
+        finally:
+            os.chdir(cwd)
+            actions.init_platform = "auto"
+            actions.init_force = False
+
+        # Files should be overwritten when --force is used
+        assert (tmp_path / "Makefile").read_text() != ""
+        assert (tmp_path / "Dockerfile.ci-fedora").read_text() != ""
+
 
 class TestCopyDirectoryPlatform:
     def test_copies_gitlab_ci_for_gitlab_platform(self, tmp_path):

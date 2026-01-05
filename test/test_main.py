@@ -45,6 +45,7 @@ class TestMain:
         assert "--platform" in out
         assert "github" in out
         assert "gitlab" in out
+        assert "--force" in out
 
     def test_init_platform_github(self, argv, mocker):
         argv.extend(["init", "--platform", "github"])
@@ -63,3 +64,14 @@ class TestMain:
         mocker.patch("pathlib.Path.iterdir", return_value=[])
         main_module.main()
         assert actions.init_platform == "gitlab"
+
+    def test_init_force(self, argv, mocker):
+        argv.extend(["init", "--platform", "gitlab", "--force"])
+        mocker.patch("os.execv")
+        mocker.patch("os.chdir")
+        mocker.patch("os.getcwd", return_value="/tmp")
+        mocker.patch("pathlib.Path.iterdir", return_value=[])
+        main_module.main()
+        assert actions.init_force is True
+        # Reset for other tests
+        actions.init_force = False
